@@ -16,7 +16,7 @@ app.get("/tasks", (req, res) => {
 });
 
 app.post("/tasks", (req, res) => {
-  const { title, completed = false } = req.body;
+  const { title, completed = 0 } = req.body;
 
   if (!title) {
     return res.status(400).json({ error: "Le champ 'title' est obligatoire." });
@@ -25,7 +25,7 @@ app.post("/tasks", (req, res) => {
   const task = {
     id: nextId++,
     title,
-    completed: Boolean(Number(completed)),
+    completed: Number(completed) === 1 ? "completed" : "not completed",
   };
 
   tasks.push(task);
@@ -42,7 +42,9 @@ app.put("/tasks/:id", (req, res) => {
 
   const { title, completed } = req.body;
   if (title !== undefined) task.title = title;
-  if (completed !== undefined) task.completed = Boolean(Number(completed));
+  if (completed !== undefined) {
+    task.completed = Number(completed) === 1 ? "completed" : "not completed";
+  }
 
   res.json(task);
 });
