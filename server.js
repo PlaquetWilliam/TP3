@@ -18,7 +18,7 @@ app.get("/tasks", (req, res) => {
 
 // Envoyer une tâche
 app.post("/tasks", (req, res) => {
-  let { title, status = 0 } = req.body;
+  let { title, status = false } = req.body;
 
   if (title === undefined) {
     return res.status(400).json({ error: "Le champ 'title' est obligatoire." });
@@ -28,11 +28,15 @@ app.post("/tasks", (req, res) => {
     return res.status(400).json({ error: "Le champ 'title' doit être une chaîne de caractères." });
   }
 
+  if (typeof status !== "boolean") {
+    return res.status(400).json({ error: "Le champ 'status' doit être soit true ou false." });
+  }
+
   // Données de la tâche
   const task = {
     id: nextId++,
     title: title.trim(),
-    status: Number(status) === 1 ? "completed" : "not completed",
+    status: Boolean(status) == true ? "completed" : "not completed",
   };
 
   tasks.push(task);
@@ -52,7 +56,7 @@ app.put("/tasks/:id", (req, res) => {
 
   if (title !== undefined) task.title = String(title);
   if (status !== undefined) {
-    task.status = Number(status) === 1 ? "completed" : "not completed";
+    task.status = Boolean(status) == true ? "completed" : "not completed";
   }
 
   res.json(task);
