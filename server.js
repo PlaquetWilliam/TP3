@@ -11,27 +11,35 @@ app.get("/", (req, res) => {
   res.send("Home page");
 });
 
+// Récupérer les tâches
 app.get("/tasks", (req, res) => {
   res.json(tasks);
 });
 
+// Envoyer une tâche
 app.post("/tasks", (req, res) => {
-  const { title, completed = 0 } = req.body;
+  let { title, status = 0 } = req.body;
 
-  if (!title) {
+  if (title === undefined) {
     return res.status(400).json({ error: "Le champ 'title' est obligatoire." });
   }
 
+  if (typeof title !== "string") {
+    return res.status(400).json({ error: "Le champ 'title' doit être une chaîne de caractères." });
+  }
+
+  // Données de la tâche
   const task = {
     id: nextId++,
-    title,
-    completed: Number(completed) === 1 ? "completed" : "not completed",
+    title: title.trim(),
+    status: Number(status) === 1 ? "completed" : "not completed",
   };
 
   tasks.push(task);
   res.status(201).json(task);
 });
 
+// Modifier une tâche avec son ID
 app.put("/tasks/:id", (req, res) => {
   const id = Number(req.params.id);
   const task = tasks.find((t) => t.id === id);
@@ -40,15 +48,17 @@ app.put("/tasks/:id", (req, res) => {
     return res.status(404).json({ error: "Tâche introuvable." });
   }
 
-  const { title, completed } = req.body;
-  if (title !== undefined) task.title = title;
-  if (completed !== undefined) {
-    task.completed = Number(completed) === 1 ? "completed" : "not completed";
+  let { title, status } = req.body;
+
+  if (title !== undefined) task.title = String(title);
+  if (status !== undefined) {
+    task.status = Number(status) === 1 ? "completed" : "not completed";
   }
 
   res.json(task);
 });
 
+// Supprimer une tâche avec son ID
 app.delete("/tasks/:id", (req, res) => {
   const id = Number(req.params.id);
   const initialLength = tasks.length;
@@ -62,6 +72,7 @@ app.delete("/tasks/:id", (req, res) => {
   res.status(204).end();
 });
 
+// Lancer le serveur
 app.listen(port, () => {
   console.log(`Serveur en ligne sur http://localhost:${port}`);
 });
