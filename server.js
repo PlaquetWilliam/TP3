@@ -62,6 +62,26 @@ app.put("/tasks/:id", (req, res) => {
   res.json(task);
 });
 
+// Marquer une tâche comme complétée ou non
+app.patch("/tasks/:id/completed", (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return res.status(400).json({ error: "ID invalide." });
+
+  const task = findTask(id);
+  if (!task) return res.status(404).json({ error: "Tâche introuvable." });
+
+  const { status, completed } = req.body ?? {};
+  if (typeof status === "boolean") {
+    task.status = status;
+  } else if (typeof completed === "boolean") {
+    task.status = completed;
+  } else {
+    task.status = !task.status;
+  }
+
+  res.json(task);
+});
+
 // Supprimer une tâche avec son ID
 app.delete("/tasks/:id", (req, res) => {
   const id = Number(req.params.id);
